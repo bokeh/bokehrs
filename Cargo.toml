@@ -1,0 +1,14 @@
+[workspace]
+members = ["./crates/bokeh-rs"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "BSD-3 (https://opensource.org/license/bsd-3-clause/)"
+repository = "https://github.com/bokeh/bokehrs"
+
+[workspace.dependencies]
+bokeh-rs = {path = "./crates/bokeh-rs/", version = "*"}
+
+[profile.release]
+lto = true

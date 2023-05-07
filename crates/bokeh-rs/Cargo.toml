@@ -1,0 +1,13 @@
+[package]
+name = "bokeh-rs"
+description = "Bokeh for Rust"
+version = {workspace = true}
+edition = {workspace = true}
+license = {workspace = true}
+repository = {workspace = true}
+
+[dependencies]
+polars = {version = "0.28.0", features = ["strings", "lazy"]}
+
+[dev-dependencies]
+approx = {version = "0.5.1"}
