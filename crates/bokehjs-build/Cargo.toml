@@ -1,0 +1,20 @@
+[package]
+name = "bokehjs-build"
+description = "Build system for BokehJS"
+version = {workspace = true}
+edition = {workspace = true}
+license = {workspace = true}
+repository = {workspace = true}
+
+[dependencies]
+clap = { version = "4.3.*", features = ["derive"] }
+serde = "1"
+swc_core = { version = "0.76.*", features = [
+  "ecma_plugin_transform",
+  "ecma_parser",
+  "ecma_utils",
+  "ecma_visit",
+  "ecma_ast",
+  "common",
+] }
+

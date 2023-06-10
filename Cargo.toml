@@ -1,5 +1,8 @@
 [workspace]
-members = ["./crates/bokeh-rs"]
+members = [
+  "./crates/bokeh-rs",
+  "./crates/bokehjs-build",
+]
 
 [workspace.package]
 version = "0.1.0"
@@ -9,6 +12,7 @@ repository = "https://github.com/bokeh/bokehrs"
 
 [workspace.dependencies]
 bokeh-rs = {path = "./crates/bokeh-rs/", version = "*"}
+bokehjs-build = {path = "./crates/bokehjs-build/", version = "*"}
 
 [profile.release]
 lto = true
