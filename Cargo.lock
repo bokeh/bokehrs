@@ -254,6 +254,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "bokehjs-lib"
+version = "0.1.0"
+dependencies = [
+ "approx",
+ "static_aabb2d_index",
+]
+
+[[package]]
 name = "boolinator"
 version = "2.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2022,6 +2030,15 @@ dependencies = [
  "libc",
  "psm",
  "winapi",
+]
+
+[[package]]
+name = "static_aabb2d_index"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e51f87094a01276209d4162549639ecb88f9999d66f5f7f47db8145feb1031c3"
+dependencies = [
+ "num-traits",
 ]
 
 [[package]]
