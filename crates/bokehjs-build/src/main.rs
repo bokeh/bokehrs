@@ -5,6 +5,7 @@ use std::fs;
 use swc_core::ecma::parser::{lexer::Lexer, Parser, Syntax, StringInput, TsConfig};
 use swc_core::ecma::ast::{Module, EsVersion, ClassMember, ClassProp, PropName, Ident, Expr, Lit, Str};
 use swc_core::ecma::visit::{VisitMut, VisitMutWith};
+use swc_core::ecma::codegen::{Config, Emitter, text_writer::JsWriter};
 use swc_core::common::{SourceMap/*, FileName*/, DUMMY_SP as DUMMY_SPAN};
 use swc_core::common::errors::{ColorConfig, Handler};
 use swc_core::common::sync::Lrc;
@@ -50,14 +51,18 @@ use clap::Parser as ArgsParser;
 #[command(author, version, about, long_about = None)]
 struct Args {
     #[arg(short, long)]
-    dir: Vec<String>,
+    path: Vec<String>,
 }
 
-fn traverse(dir: &Path) -> std::io::Result<Vec<PathBuf>> {
+fn traverse(path: PathBuf) -> std::io::Result<Vec<PathBuf>> {
+  let mut queue: VecDeque<PathBuf> = VecDeque::new();
   let mut paths: Vec<PathBuf> = Vec::new();
 
-  let mut queue: VecDeque<PathBuf> = VecDeque::new();
-  queue.push_back(dir.to_path_buf());
+  if path.is_dir() {
+    queue.push_back(path);
+  } else {
+    paths.push(path);
+  }
 
   while let Some(dir) = queue.pop_front() {
     for entry in fs::read_dir(dir)? {
@@ -74,20 +79,44 @@ fn traverse(dir: &Path) -> std::io::Result<Vec<PathBuf>> {
   Ok(paths)
 }
 
+fn codegen(cm: Lrc<SourceMap>, module: &Module) -> String {
+  let mut buf = vec![];
+  let wr = JsWriter::new(cm.clone(), "\n", &mut buf, None);
+  let mut emitter = Emitter {
+    cfg: Config {
+      target: EsVersion::Es2022,
+      minify: false,
+      ascii_only: false,
+      omit_last_semi: false,
+    },
+    cm: cm.clone(),
+    comments: None,
+    wr,
+  };
+  emitter.emit_module(&module).unwrap();
+  let code = String::from_utf8(buf).unwrap();
+  code
+}
+
 pub fn main() -> std::io::Result<()> {
   let args = Args::parse();
 
   let cm: Lrc<SourceMap> = Default::default();
   let handler = Handler::with_tty_emitter(ColorConfig::Auto, true, false, Some(cm.clone()));
 
-  for dir in args.dir {
-    for path in traverse(&Path::new(&dir))? {
+  for path in args.path {
+    for path in traverse(Path::new(&path).to_path_buf())? {
       if let Some(ext) = path.extension() {
         if ext == "ts" && path.with_extension("").extension().is_none() {
           println!("{}", path.display());
-          parse(&path, &cm, &handler).map(|mut module| {
-            module.visit_mut_with(&mut TransformVisitor {});
-          });
+          let code = parse(&path, &cm, &handler).map(|mut module| {
+            let mut visitor = TransformVisitor {};
+            module.visit_mut_with(&mut visitor);
+            module
+          }).map(|module| {
+            codegen(cm.clone(), &module)
+          }).unwrap();
+          println!("{}", code);
         }
       }
     }
@@ -110,7 +139,7 @@ fn parse(path: &Path, cm: &Lrc<SourceMap>, handler: &Handler) -> Option<Module> 
         decorators: true,
         ..Default::default()
       }),
-      EsVersion::Es2017,
+      EsVersion::Es2022,
       StringInput::from(&*fm),
       None,
   );

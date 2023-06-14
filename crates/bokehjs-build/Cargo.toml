@@ -10,11 +10,13 @@ repository = {workspace = true}
 clap = { version = "4.3.*", features = ["derive"] }
 serde = "1"
 swc_core = { version = "0.76.*", features = [
-  "ecma_plugin_transform",
+  "common",
+  "ecma_ast",
+  "ecma_codegen",
+  #"ecma_minifier", # E0554
   "ecma_parser",
+  "ecma_plugin_transform",
   "ecma_utils",
   "ecma_visit",
-  "ecma_ast",
-  "common",
 ] }
 
